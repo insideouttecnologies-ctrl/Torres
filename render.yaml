@@ -1,0 +1,29 @@
+services:
+  - type: web
+    name: torres-api
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+      - key: DB_URL
+        value: jdbc:postgresql://torres_user:UjBdNqKar3WYYcAket8g0qHckXFfIl8z@dpg-davno5gu01pc73fforlg-a.oregon-postgres.render.com/torres
+      - key: DB_USERNAME
+        value: torres_user
+      - key: DB_PASSWORD
+        value: UjBdNqKar3WYYcAket8g0qHckXFfIl8z
+      - key: DB_DRIVER
+        value: org.postgresql.Driver
+      - key: DB_DIALECT
+        value: org.hibernate.dialect.PostgreSQLDialect
+      - key: APP_JWT_SECRET
+        generateValue: true
+      - key: APP_JWT_EXPIRATION
+        value: 86400000
+      - key: API_SECURITY_TOKEN_SECRET
+        generateValue: true
