@@ -7,6 +7,8 @@ import com.us.Torres.models.internamento.InternamentoRequest;
 import com.us.Torres.service.InternamentoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -19,10 +21,35 @@ public class InternamentoController {
 
     private final InternamentoService internamentoService;
 
+    @GetMapping("/internamentos")
+    @PreAuthorize("hasAnyRole('ADMIN','MEDICO','ENFERMEIRO','RECEPCIONISTA')")
+    public ResponseEntity<List<Internamento>> listarInternamentos() {
+        return ResponseEntity.ok(internamentoService.listarTodos());
+    }
+
+    @GetMapping("/internamentos/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','MEDICO','ENFERMEIRO','RECEPCIONISTA')")
+    public ResponseEntity<Internamento> buscarInternamento(@PathVariable String id) {
+        return ResponseEntity.ok(internamentoService.buscarPorId(id));
+    }
+
     @PostMapping("/internamentos")
     @PreAuthorize("hasAnyRole('ADMIN','MEDICO','ENFERMEIRO')")
     public ResponseEntity<Internamento> admitirPaciente(@RequestBody InternamentoRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(internamentoService.admitirPaciente(request));
+    }
+
+    @PutMapping("/internamentos/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','MEDICO','ENFERMEIRO')")
+    public ResponseEntity<Internamento> atualizarInternamento(@PathVariable String id, @RequestBody InternamentoRequest request) {
+        return ResponseEntity.ok(internamentoService.atualizarInternamento(id, request));
+    }
+
+    @DeleteMapping("/internamentos/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN','MEDICO','ENFERMEIRO')")
+    public ResponseEntity<Void> deletarInternamento(@PathVariable String id) {
+        internamentoService.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/internamentos/{id}/evolucao")

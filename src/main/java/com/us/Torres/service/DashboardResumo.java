@@ -15,9 +15,12 @@ public class DashboardResumo {
 
     private Long totalPacientes;
     private Long totalConsultas;
+    private Long totalMedicos;
     private Long totalTriagens;
     private Long admissoesAtivas;
+    private Long totalLeitos;
     private Long leitosOcupados;
+    private Long leitosDisponiveis;
     private Long receitasPendentes;
     private BigDecimal faturamentoPeriodo;
     private Long medicamentosEstoqueBaixo;

@@ -22,13 +22,28 @@ public class FarmaciaController {
 
     @GetMapping("/prescricoes")
     @PreAuthorize("hasAnyRole('ADMIN','FARMACEUTICO','MEDICO','ENFERMEIRO')")
-    public ResponseEntity<List<Receita>> listarPrescricoes() {
+    public ResponseEntity<List<Receita>> listarPrescricoes(@RequestParam(required = false) String status) {
+        if ("TODAS".equalsIgnoreCase(status) || "ALL".equalsIgnoreCase(status)) {
+            return ResponseEntity.ok(receitaService.listarTodas());
+        }
         return ResponseEntity.ok(receitaService.listarPendentes());
+    }
+
+    @PostMapping("/prescricoes")
+    @PreAuthorize("hasAnyRole('ADMIN','FARMACEUTICO','MEDICO','ENFERMEIRO')")
+    public ResponseEntity<Receita> criarPrescricao(@RequestBody Receita receita) {
+        return ResponseEntity.status(org.springframework.http.HttpStatus.CREATED).body(receitaService.criar(receita));
     }
 
     @PostMapping("/dispensar")
     @PreAuthorize("hasAnyRole('ADMIN','FARMACEUTICO')")
     public ResponseEntity<Dispensacao> dispensar(@RequestBody DispensacaoRequest request) {
         return ResponseEntity.ok(dispensacaoService.dispensar(request));
+    }
+
+    @GetMapping("/dispensacoes")
+    @PreAuthorize("hasAnyRole('ADMIN','FARMACEUTICO','MEDICO','ENFERMEIRO')")
+    public ResponseEntity<List<Dispensacao>> listarDispensacoes() {
+        return ResponseEntity.ok(dispensacaoService.listarTodas());
     }
 }

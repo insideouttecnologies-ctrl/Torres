@@ -31,6 +31,30 @@ public class LaboratorioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(laboratorioService.solicitarExame(exame));
     }
 
+    @GetMapping("/exames/{protocolo}")
+    @PreAuthorize("hasAnyRole('ADMIN','MEDICO','ENFERMEIRO','LABORATORISTA','TECNICO')")
+    public ResponseEntity<SolicitacaoExame> buscarExame(@PathVariable String protocolo) {
+        return ResponseEntity.ok(laboratorioService.buscarPorProtocolo(protocolo));
+    }
+
+    @GetMapping("/exames/{protocolo}/laudo")
+    @PreAuthorize("hasAnyRole('ADMIN','MEDICO','ENFERMEIRO','LABORATORISTA','TECNICO')")
+    public ResponseEntity<LaudoLaboratorial> obterLaudo(@PathVariable String protocolo) {
+        return ResponseEntity.ok(laboratorioService.buscarLaudoPorProtocolo(protocolo));
+    }
+
+    @PatchMapping("/exames/{protocolo}/status")
+    @PreAuthorize("hasAnyRole('ADMIN','LABORATORISTA','TECNICO','MEDICO','ENFERMEIRO')")
+    public ResponseEntity<SolicitacaoExame> alterarStatus(@PathVariable String protocolo, @RequestParam SolicitacaoExame.StatusExame status) {
+        return ResponseEntity.ok(laboratorioService.alterarStatus(protocolo, status));
+    }
+
+    @PatchMapping("/exames/{protocolo}/prioridade")
+    @PreAuthorize("hasAnyRole('ADMIN','LABORATORISTA','TECNICO','MEDICO','ENFERMEIRO')")
+    public ResponseEntity<SolicitacaoExame> alterarPrioridade(@PathVariable String protocolo, @RequestParam SolicitacaoExame.PrioridadeExame prioridade) {
+        return ResponseEntity.ok(laboratorioService.alterarPrioridade(protocolo, prioridade));
+    }
+
     @PostMapping("/exames/{protocolo}/laudo")
     @PreAuthorize("hasAnyRole('ADMIN','LABORATORISTA','TECNICO')")
     public ResponseEntity<LaudoLaboratorial> registrarLaudo(@PathVariable String protocolo, @RequestBody LaudoRequest request) {

@@ -53,7 +53,7 @@ public class Medicamento {
 
     private String localizacaoAlmoxarifado;
 
-    private String statusEstoque; // NORMAL, BAIXO, CRITICO_BAIXO
+    private String statusEstoque;
 
     private boolean controlado;
 
@@ -62,17 +62,24 @@ public class Medicamento {
     @PrePersist
     @PreUpdate
     public void calcularStatusEstoque() {
-        if (quantidade == null) {
-            quantidade = 0;
+
+        if (quantidade == null
+                || quantidadeMinima == null) {
+
+            statusEstoque = null;
+            return;
         }
-        if (quantidadeMinima == null) {
-            quantidadeMinima = 10;
-        }
+
         if (quantidade <= 5) {
+
             statusEstoque = "CRITICO_BAIXO";
+
         } else if (quantidade <= quantidadeMinima) {
+
             statusEstoque = "BAIXO";
+
         } else {
+
             statusEstoque = "NORMAL";
         }
     }

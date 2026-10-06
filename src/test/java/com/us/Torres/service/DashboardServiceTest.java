@@ -18,6 +18,7 @@ class DashboardServiceTest {
     void shouldAggregateResumenMetrics() {
         PacienteRepository pacienteRepository = mock(PacienteRepository.class);
         ConsultaRepository consultaRepository = mock(ConsultaRepository.class);
+        MedicoRepository medicoRepository = mock(MedicoRepository.class);
         TriagemRepository triagemRepository = mock(TriagemRepository.class);
         InternamentoRepository internamentoRepository = mock(InternamentoRepository.class);
         LeitoRepository leitoRepository = mock(LeitoRepository.class);
@@ -27,15 +28,41 @@ class DashboardServiceTest {
 
         when(pacienteRepository.count()).thenReturn(120L);
         when(consultaRepository.count()).thenReturn(38L);
+        when(medicoRepository.count()).thenReturn(15L);
         when(triagemRepository.count()).thenReturn(27L);
         when(internamentoRepository.findByStatusOrderByDataAdmissaoDesc(Internamento.StatusInternamento.ATIVO)).thenReturn(List.of(
                 Internamento.builder().id("i-1").status(Internamento.StatusInternamento.ATIVO).build(),
                 Internamento.builder().id("i-2").status(Internamento.StatusInternamento.ATIVO).build()
         ));
-        when(leitoRepository.findByStatusOrderByCodigoAsc(Leito.StatusLeito.OCUPADO)).thenReturn(List.of(
-                Leito.builder().id("l-1").status(Leito.StatusLeito.OCUPADO).build(),
+        when(leitoRepository.count()).thenReturn(10L);
+        when(leitoRepository.findAllByOrderByCodigoAsc()).thenReturn(List.of(
+                Leito.builder().id("l-1").status(Leito.StatusLeito.DISPONIVEL).build(),
                 Leito.builder().id("l-2").status(Leito.StatusLeito.OCUPADO).build(),
-                Leito.builder().id("l-3").status(Leito.StatusLeito.OCUPADO).build()
+                Leito.builder().id("l-3").status(Leito.StatusLeito.OCUPADO).build(),
+                Leito.builder().id("l-4").status(Leito.StatusLeito.OCUPADO).build(),
+                Leito.builder().id("l-5").status(Leito.StatusLeito.DISPONIVEL).build(),
+                Leito.builder().id("l-6").status(Leito.StatusLeito.DISPONIVEL).build(),
+                Leito.builder().id("l-7").status(Leito.StatusLeito.DISPONIVEL).build(),
+                Leito.builder().id("l-8").status(Leito.StatusLeito.DISPONIVEL).build(),
+                Leito.builder().id("l-9").status(Leito.StatusLeito.DISPONIVEL).build(),
+                Leito.builder().id("l-10").status(Leito.StatusLeito.DISPONIVEL).build()
+        ));
+        when(leitoRepository.findByStatusOrderByCodigoAsc(Leito.StatusLeito.OCUPADO)).thenReturn(List.of(
+                Leito.builder().id("l-2").status(Leito.StatusLeito.OCUPADO).build(),
+                Leito.builder().id("l-3").status(Leito.StatusLeito.OCUPADO).build(),
+                Leito.builder().id("l-4").status(Leito.StatusLeito.OCUPADO).build()
+        ));
+        when(leitoRepository.findAllByOrderByCodigoAsc()).thenReturn(List.of(
+                Leito.builder().id("l-1").status(Leito.StatusLeito.DISPONIVEL).build(),
+                Leito.builder().id("l-2").status(Leito.StatusLeito.OCUPADO).build(),
+                Leito.builder().id("l-3").status(Leito.StatusLeito.OCUPADO).build(),
+                Leito.builder().id("l-4").status(Leito.StatusLeito.OCUPADO).build(),
+                Leito.builder().id("l-5").status(Leito.StatusLeito.DISPONIVEL).build(),
+                Leito.builder().id("l-6").status(Leito.StatusLeito.DISPONIVEL).build(),
+                Leito.builder().id("l-7").status(Leito.StatusLeito.DISPONIVEL).build(),
+                Leito.builder().id("l-8").status(Leito.StatusLeito.DISPONIVEL).build(),
+                Leito.builder().id("l-9").status(Leito.StatusLeito.DISPONIVEL).build(),
+                Leito.builder().id("l-10").status(Leito.StatusLeito.DISPONIVEL).build()
         ));
         when(receitaRepository.findByStatusOrderByDataEmissaoDesc(Receita.StatusReceita.PENDENTE)).thenReturn(List.of(
                 Receita.builder().id("r-1").status(Receita.StatusReceita.PENDENTE).build(),
@@ -54,6 +81,7 @@ class DashboardServiceTest {
         DashboardService dashboardService = new DashboardService(
                 pacienteRepository,
                 consultaRepository,
+                medicoRepository,
                 triagemRepository,
                 internamentoRepository,
                 leitoRepository,
@@ -67,9 +95,12 @@ class DashboardServiceTest {
         assertNotNull(resumo);
         assertEquals(120L, resumo.getTotalPacientes());
         assertEquals(38L, resumo.getTotalConsultas());
+        assertEquals(15L, resumo.getTotalMedicos());
         assertEquals(27L, resumo.getTotalTriagens());
         assertEquals(2L, resumo.getAdmissoesAtivas());
         assertEquals(3L, resumo.getLeitosOcupados());
+        assertEquals(7L, resumo.getLeitosDisponiveis());
+        assertEquals(10L, resumo.getTotalLeitos());
         assertEquals(2L, resumo.getReceitasPendentes());
         assertEquals(500.00, resumo.getFaturamentoPeriodo().doubleValue(), 0.01);
         assertEquals(1L, resumo.getMedicamentosEstoqueBaixo());
@@ -79,6 +110,7 @@ class DashboardServiceTest {
     void shouldReturnEmptySummaryWhenNoData() {
         PacienteRepository pacienteRepository = mock(PacienteRepository.class);
         ConsultaRepository consultaRepository = mock(ConsultaRepository.class);
+        MedicoRepository medicoRepository = mock(MedicoRepository.class);
         TriagemRepository triagemRepository = mock(TriagemRepository.class);
         InternamentoRepository internamentoRepository = mock(InternamentoRepository.class);
         LeitoRepository leitoRepository = mock(LeitoRepository.class);
@@ -88,6 +120,7 @@ class DashboardServiceTest {
 
         when(pacienteRepository.count()).thenReturn(0L);
         when(consultaRepository.count()).thenReturn(0L);
+        when(medicoRepository.count()).thenReturn(0L);
         when(triagemRepository.count()).thenReturn(0L);
         when(internamentoRepository.findByStatusOrderByDataAdmissaoDesc(Internamento.StatusInternamento.ATIVO)).thenReturn(List.of());
         when(leitoRepository.findByStatusOrderByCodigoAsc(Leito.StatusLeito.OCUPADO)).thenReturn(List.of());
@@ -98,6 +131,7 @@ class DashboardServiceTest {
         DashboardService dashboardService = new DashboardService(
                 pacienteRepository,
                 consultaRepository,
+                medicoRepository,
                 triagemRepository,
                 internamentoRepository,
                 leitoRepository,
@@ -110,9 +144,12 @@ class DashboardServiceTest {
 
         assertEquals(0L, resumo.getTotalPacientes());
         assertEquals(0L, resumo.getTotalConsultas());
+        assertEquals(0L, resumo.getTotalMedicos());
         assertEquals(0L, resumo.getTotalTriagens());
         assertEquals(0L, resumo.getAdmissoesAtivas());
         assertEquals(0L, resumo.getLeitosOcupados());
+        assertEquals(0L, resumo.getLeitosDisponiveis());
+        assertEquals(0L, resumo.getTotalLeitos());
         assertEquals(0L, resumo.getReceitasPendentes());
         assertEquals(0.00, resumo.getFaturamentoPeriodo().doubleValue(), 0.01);
         assertEquals(0L, resumo.getMedicamentosEstoqueBaixo());

@@ -31,6 +31,15 @@ public class InternamentoService {
         return leitoRepository.findAll().stream().map(this::mapearLeito).toList();
     }
 
+    public List<Internamento> listarTodos() {
+        return internamentoRepository.findAllByOrderByDataAdmissaoDesc();
+    }
+
+    public Internamento buscarPorId(String id) {
+        return internamentoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Internamento não encontrado."));
+    }
+
     public Internamento admitirPaciente(InternamentoRequest request) {
         if (request == null || request.getPacienteId() == null || request.getLeitoId() == null) {
             throw new BusinessException("Paciente e leito são obrigatórios para a admissão.");
@@ -120,6 +129,60 @@ public class InternamentoService {
         validarTransicao(internamento.getStatus(), status);
         internamento.setStatus(status);
         return internamentoRepository.save(internamento);
+    }
+
+    public Internamento atualizarInternamento(String internamentoId, InternamentoRequest request) {
+        Internamento internamento = buscarPorId(internamentoId);
+
+        if (request == null) {
+            throw new BusinessException("Dados do internamento são obrigatórios.");
+        }
+
+        if (request.getDiagnosticoAdmissao() != null && !request.getDiagnosticoAdmissao().isBlank()) {
+            internamento.setDiagnosticoAdmissao(request.getDiagnosticoAdmissao());
+        }
+
+        if (request.getMedicoId() != null && !request.getMedicoId().isBlank()) {
+            internamento.setMedicoResponsavelId(request.getMedicoId());
+            internamento.setMedicoResponsavelNome(obterNomeMedico(request.getMedicoId()));
+        }
+
+        if (request.getLeitoId() != null && !request.getLeitoId().isBlank()) {
+            Leito novoLeito = leitoRepository.findById(request.getLeitoId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Leito não encontrado."));
+
+            if (novoLeito.getStatus() != Leito.StatusLeito.DISPONIVEL && !request.getLeitoId().equals(internamento.getLeitoId())) {
+                throw new BusinessException("O leito de destino não está disponível.");
+            }
+
+            internamento.setLeitoId(novoLeito.getId());
+            internamento.setLeitoCodigo(novoLeito.getCodigo());
+            internamento.setAla(novoLeito.getAla());
+        }
+
+        if (request.getAla() != null && !request.getAla().isBlank()) {
+            internamento.setAla(request.getAla());
+        }
+
+        return internamentoRepository.save(internamento);
+    }
+
+    public void deletar(String internamentoId) {
+        Internamento internamento = buscarPorId(internamentoId);
+
+        if (internamento.getLeitoId() != null) {
+            Leito leito = leitoRepository.findById(internamento.getLeitoId()).orElse(null);
+            if (leito != null) {
+                leito.setStatus(Leito.StatusLeito.DISPONIVEL);
+                leito.setPacienteAtualId(null);
+                leito.setPacienteAtualNome(null);
+                leito.setDataAdmissao(null);
+                leito.setMedicoAssistente(null);
+                leitoRepository.save(leito);
+            }
+        }
+
+        internamentoRepository.delete(internamento);
     }
 
     public Internamento darAlta(String internamentoId) {

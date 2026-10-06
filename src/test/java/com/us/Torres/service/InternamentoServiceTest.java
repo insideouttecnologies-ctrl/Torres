@@ -1,6 +1,7 @@
 package com.us.Torres.service;
 
 import com.us.Torres.infra.exceptions.BusinessException;
+import com.us.Torres.infra.exceptions.ResourceNotFoundException;
 import com.us.Torres.models.*;
 import com.us.Torres.models.internamento.InternamentoRequest;
 import com.us.Torres.repository.*;
@@ -71,5 +72,32 @@ class InternamentoServiceTest {
                 .build();
 
         assertThrows(BusinessException.class, () -> internamentoService.admitirPaciente(request));
+    }
+
+    @Test
+    void deveBloquearAltaQuandoInternamentoNaoEstaAtivo() {
+        Internamento internamento = Internamento.builder()
+                .id("i-2")
+                .status(Internamento.StatusInternamento.ALTA_CONCEDIDA)
+                .build();
+
+        when(internamentoRepository.findById("i-2")).thenReturn(Optional.of(internamento));
+
+        assertThrows(BusinessException.class, () -> internamentoService.darAlta("i-2"));
+    }
+
+    @Test
+    void deveBloquearTransferenciaQuandoLeitoDestinoNaoExiste() {
+        Internamento internamento = Internamento.builder()
+                .id("i-3")
+                .pacienteId("p-2")
+                .leitoId("l-2")
+                .status(Internamento.StatusInternamento.ATIVO)
+                .build();
+
+        when(internamentoRepository.findById("i-3")).thenReturn(Optional.of(internamento));
+        when(leitoRepository.findById("l-99")).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class, () -> internamentoService.transferirPaciente("i-3", "l-99"));
     }
 }

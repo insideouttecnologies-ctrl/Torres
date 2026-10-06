@@ -14,6 +14,7 @@ public class DashboardService {
 
     private final PacienteRepository pacienteRepository;
     private final ConsultaRepository consultaRepository;
+    private final MedicoRepository medicoRepository;
     private final TriagemRepository triagemRepository;
     private final InternamentoRepository internamentoRepository;
     private final LeitoRepository leitoRepository;
@@ -22,16 +23,24 @@ public class DashboardService {
     private final MedicamentoRepository medicamentoRepository;
 
     public DashboardResumo obterResumo() {
+        long totalLeitos = leitoRepository.count();
+        long leitosDisponiveis = leitoRepository.findAllByOrderByCodigoAsc().stream()
+                .filter(leito -> leito.getStatus() == Leito.StatusLeito.DISPONIVEL)
+                .count();
+
         return DashboardResumo.builder()
                 .totalPacientes(pacienteRepository.count())
                 .totalConsultas(consultaRepository.count())
+                .totalMedicos(medicoRepository.count())
                 .totalTriagens(triagemRepository.count())
                 .admissoesAtivas((long) internamentoRepository
                         .findByStatusOrderByDataAdmissaoDesc(Internamento.StatusInternamento.ATIVO)
                         .size())
+                .totalLeitos(totalLeitos)
                 .leitosOcupados((long) leitoRepository
                         .findByStatusOrderByCodigoAsc(Leito.StatusLeito.OCUPADO)
                         .size())
+                .leitosDisponiveis(leitosDisponiveis)
                 .receitasPendentes((long) receitaRepository
                         .findByStatusOrderByDataEmissaoDesc(Receita.StatusReceita.PENDENTE)
                         .size())

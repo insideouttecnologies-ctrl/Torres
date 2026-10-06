@@ -51,6 +51,28 @@ public class LaboratorioService {
         return solicitacaoExameRepository.findAllByOrderByDataSolicitacaoDesc();
     }
 
+    public SolicitacaoExame buscarPorProtocolo(String protocolo) {
+        return solicitacaoExameRepository.findByProtocolo(protocolo)
+                .orElseThrow(() -> new ResourceNotFoundException("Solicitação de exame não encontrada."));
+    }
+
+    public LaudoLaboratorial buscarLaudoPorProtocolo(String protocolo) {
+        return laudoLaboratorialRepository.findByProtocolo(protocolo)
+                .orElseThrow(() -> new ResourceNotFoundException("Laudo não encontrado para o protocolo informado."));
+    }
+
+    public SolicitacaoExame alterarStatus(String protocolo, SolicitacaoExame.StatusExame status) {
+        SolicitacaoExame solicitacao = buscarPorProtocolo(protocolo);
+        solicitacao.setStatus(status);
+        return solicitacaoExameRepository.save(solicitacao);
+    }
+
+    public SolicitacaoExame alterarPrioridade(String protocolo, SolicitacaoExame.PrioridadeExame prioridade) {
+        SolicitacaoExame solicitacao = buscarPorProtocolo(protocolo);
+        solicitacao.setPrioridade(prioridade);
+        return solicitacaoExameRepository.save(solicitacao);
+    }
+
     public LaudoLaboratorial registrarLaudo(String protocolo, LaudoRequest request) {
         SolicitacaoExame solicitacao = solicitacaoExameRepository.findByProtocolo(protocolo)
                 .orElseThrow(() -> new ResourceNotFoundException("Solicitação de exame não encontrada."));
@@ -59,7 +81,12 @@ public class LaboratorioService {
             throw new BusinessException("Laudo não informado.");
         }
 
-        String parametrosJson = request.getParametros() == null ? "[]" : request.getParametros().toString();
+        String parametrosJson;
+        try {
+            parametrosJson = request.getParametros() == null ? "[]" : new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(request.getParametros());
+        } catch (Exception e) {
+            parametrosJson = "[]";
+        }
         String hash = "LAUDO-" + UUID.randomUUID().toString().substring(0, 12).toUpperCase();
 
         LaudoLaboratorial laudo = LaudoLaboratorial.builder()
