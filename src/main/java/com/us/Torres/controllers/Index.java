@@ -8,6 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class Index {
     @GetMapping
     public ResponseEntity status(){
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("The app is up and running").build();
     }
 }
