@@ -37,6 +37,7 @@ public class SecurityConfiguration {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/").permitAll()
                         .requestMatchers(HttpMethod.POST, "/v1/auth/**", "/api/v1/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/v1/auth/**", "/api/v1/auth/**").permitAll()
                         .requestMatchers("/h2-console/**", "/error").permitAll()
